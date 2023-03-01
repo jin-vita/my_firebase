@@ -11,6 +11,7 @@ import 'page/page_home.dart';
 // flutter pub add firebase_auth
 // flutter pub add firebase_database
 // flutter pub add firebase_messaging
+// flutter pub add flutter_local_notifications
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
