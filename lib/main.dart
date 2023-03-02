@@ -1,22 +1,38 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:logger/logger.dart';
 
 import 'controller/controller_notification.dart';
 import 'firebase_options.dart';
 import 'page/page_home.dart';
 
 // flutter pub add get
+// flutter pub add dio
+// flutter pub add http
+// flutter pub add logger
 // flutter pub add firebase_core
 // flutter pub add firebase_auth
+// flutter pub add googleapis_auth
 // flutter pub add firebase_database
 // flutter pub add firebase_messaging
 // flutter pub add flutter_local_notifications
+
+final log = Logger();
+
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  log.i("background message : ${message.notification?.body}");
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
   runApp(const MyApp());
 }
 
