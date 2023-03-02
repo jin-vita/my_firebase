@@ -74,7 +74,6 @@ class NotificationController extends GetxController {
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       if (message.notification != null) {
-        log.i('Message also contained a notification: ${message.notification}');
         log.i('message: ${message.notification?.body}');
         myMessage.value = message;
         flutterLocalNotificationsPlugin.show(
@@ -97,7 +96,7 @@ class NotificationController extends GetxController {
         );
 
         const AndroidInitializationSettings initializationSettingsAndroid =
-            AndroidInitializationSettings('/assets/images/firebase.png');
+            AndroidInitializationSettings('firebase');
         const DarwinInitializationSettings initializationSettingsIOS =
             DarwinInitializationSettings();
         const InitializationSettings initializationSettings =
@@ -143,7 +142,6 @@ class NotificationController extends GetxController {
     final client =
         await clientViaServiceAccount(serviceAccountCredentials, scopes);
     final accessCredentials = client.credentials.accessToken;
-    log.w('getGoogleOAuth2Token : ${accessCredentials.data}');
     return accessCredentials.data;
   }
 

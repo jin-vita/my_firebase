@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_firebase/controller/controller_notification.dart';
 
-import '../main.dart';
-
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
 
@@ -23,7 +21,6 @@ class HomePage extends StatelessWidget {
                   NotificationController.to.myMessage.value.notification;
               String text = '수신된 메시지가 없습니다.';
               if (message != null) {
-                log.i('Obx message: ${message.body}');
                 text = message.body ?? '수신된 메시지가 없습니다';
               }
               return Text(text);
