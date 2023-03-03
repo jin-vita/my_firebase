@@ -21,10 +21,10 @@ class NotificationController extends GetxController {
   Rx<RemoteMessage> myMessage = const RemoteMessage().obs;
 
   // FCM token from FCM instance
-  String fcmToken = '';
+  late String fcmToken;
 
   // FCM project id from google_key.json file
-  String projectId = '';
+  late String projectId;
 
   @override
   void onInit() {
@@ -52,9 +52,8 @@ class NotificationController extends GetxController {
 
   // generate FCM token
   Future<void> getToken() async {
-    final token = await messaging.getToken() ?? '토큰 가져오기 실패';
-    log.i('token : $token');
-    fcmToken = token;
+    fcmToken = await messaging.getToken() ?? '토큰 가져오기 실패';
+    log.i('token : $fcmToken');
   }
 
   // check received FCM message
