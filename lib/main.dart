@@ -5,8 +5,11 @@ import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 
 import 'controller/controller_notification.dart';
+import 'controller/controller_user.dart';
 import 'firebase_options.dart';
+import 'page/page_auth.dart';
 import 'page/page_home.dart';
+import 'page/page_menu.dart';
 
 // flutter pub add get
 // flutter pub add dio
@@ -14,6 +17,7 @@ import 'page/page_home.dart';
 // flutter pub add logger
 // flutter pub add firebase_core
 // flutter pub add firebase_auth
+// flutter pub add google_sign_in
 // flutter pub add googleapis_auth
 // flutter pub add firebase_database
 // flutter pub add firebase_messaging
@@ -49,8 +53,23 @@ class MyApp extends StatelessWidget {
       ),
       initialBinding: BindingsBuilder(() {
         Get.put(NotificationController());
+        Get.put(UserController());
       }),
-      home: const HomePage(),
+      initialRoute: '/auth',
+      getPages: [
+        GetPage(
+          name: '/auth',
+          page: () => const AuthPage(),
+        ),
+        GetPage(
+          name: '/home',
+          page: () => const HomePage(),
+        ),
+        GetPage(
+          name: '/menu',
+          page: () => const MenuPage(),
+        ),
+      ],
     );
   }
 }

@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:googleapis_auth/auth_io.dart';
-import 'package:my_firebase/page/page_menu.dart';
 
 import '../main.dart';
 
@@ -106,7 +105,7 @@ class NotificationController extends GetxController {
 
         flutterLocalNotificationsPlugin.initialize(initializationSettings,
             onDidReceiveNotificationResponse: (NotificationResponse payload) {
-          Get.to(const MenuPage(), arguments: payload);
+          Get.toNamed('/menu', arguments: payload);
         });
       }
     });
