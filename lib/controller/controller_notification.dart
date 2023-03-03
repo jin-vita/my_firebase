@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:googleapis_auth/auth_io.dart';
+import 'package:my_firebase/util/util.dart';
 
 import '../main.dart';
 
@@ -75,6 +76,7 @@ class NotificationController extends GetxController {
       if (message.notification != null) {
         log.i('message: ${message.notification?.body}');
         myMessage.value = message;
+        Util.showSnackBar(message: message.notification?.body);
         flutterLocalNotificationsPlugin.show(
           message.hashCode,
           'FCM 알림',
