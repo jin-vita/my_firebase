@@ -11,24 +11,24 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('login page'),
+        title: const Text('로그인 하는 곳'),
       ),
       body: Center(
         child: Column(
           children: [
-            const SizedBox(height: 100),
-            const Text('환영합니다!'),
+            const SizedBox(height: 80),
+            const Text('환영합니다! 테스트 앱입니다'),
             const SizedBox(height: 20),
-            const Text('구글로 로그인해주세요'),
-            const SizedBox(height: 50),
+            const Text('구글로 로그인할 수 있습니다'),
+            const SizedBox(height: 80),
             ElevatedButton(
               onPressed: () async {
                 final user = await UserController.to.signInWithGoogle();
                 if (user != null) {
                   log.w(
                       'user name : ${user.displayName}, user email : ${user.email}');
+                  Get.offAllNamed('/auth');
                 }
-                Get.offAllNamed('/auth');
               },
               child: const Text('구글 로그인'),
             ),

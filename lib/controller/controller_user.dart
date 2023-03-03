@@ -9,19 +9,19 @@ class UserController extends GetxController {
   final FirebaseAuth auth = FirebaseAuth.instance;
 
   Future<User?> signInWithGoogle() async {
-    // 구글 로그인 인증을 획득합니다.
+    // 구글 로그인 인증 만들기
     final GoogleSignInAccount? googleSignInAccount =
         await googleSignIn.signIn();
     final GoogleSignInAuthentication googleAuth =
         await googleSignInAccount!.authentication;
 
-    // Firebase 인증 자격 증명을 만듭니다.
+    // Firebase 인증 자격 증명 만들기
     final AuthCredential credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
 
-    // Firebase에 자격 증명을 제출하여 인증합니다.
+    // Firebase 에 자격 증명을 제출하여 인증
     final UserCredential authResult =
         await auth.signInWithCredential(credential);
 

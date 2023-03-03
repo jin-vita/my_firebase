@@ -76,6 +76,7 @@ class NotificationController extends GetxController {
       if (message.notification != null) {
         log.i('message: ${message.notification?.body}');
         myMessage.value = message;
+        // 웹??
         Util.showSnackBar(message: message.notification?.body);
         flutterLocalNotificationsPlugin.show(
           message.hashCode,
