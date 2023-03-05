@@ -79,7 +79,7 @@ class NotificationController extends GetxController {
         Util.showSnackBar(message: message.notification?.body);
         flutterLocalNotificationsPlugin.show(
           message.hashCode,
-          'FCM 알림',
+          'FCM 수신',
           message.notification?.body,
           NotificationDetails(
             android: AndroidNotificationDetails(
