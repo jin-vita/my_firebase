@@ -75,7 +75,7 @@ class NotificationController extends GetxController {
       if (message.notification != null) {
         log.i('message: ${message.notification?.body}');
         myMessage.value = message;
-        // 웹??
+        // 웹에서는 수신을 안해서 스낵바 넣음
         Util.showSnackBar(message: message.notification?.body);
         flutterLocalNotificationsPlugin.show(
           message.hashCode,
