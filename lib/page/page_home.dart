@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_firebase/controller/controller_user.dart';
@@ -24,6 +25,7 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // CollectionReference aaa = FirebaseFirestore.instance.collection('user');
     final textController = TextEditingController();
     return Scaffold(
       appBar: AppBar(
@@ -38,14 +40,6 @@ class HomePage extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 30),
-              const Text(
-                '로그인한 계정 이메일',
-                style: TextStyle(
-                  fontSize: 18,
-                ),
-              ),
-              Text(UserController.to.auth.currentUser!.email!),
-              const SizedBox(height: 50),
               const Text(
                 '수신한 푸시 메시지 내용',
                 style: TextStyle(
@@ -62,6 +56,38 @@ class HomePage extends StatelessWidget {
                 return Text(text);
               }),
               const SizedBox(height: 50),
+              const Text(
+                '등록된 유저 리스트',
+                style: TextStyle(
+                  fontSize: 18,
+                ),
+              ),
+              SizedBox(
+                height: 200,
+                child: StreamBuilder(
+                  stream: UserController.to.userCollection.snapshots(),
+                  builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (snapshot.hasData) {
+                      return ListView.builder(
+                        itemCount: snapshot.data!.docs.length,
+                        itemBuilder: (context, index) {
+                          final DocumentSnapshot document =
+                              snapshot.data!.docs[index];
+                          return Card(
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            child: ListTile(
+                              title: Text(document['email']),
+                              subtitle: Text(document['email']),
+                            ),
+                          );
+                        },
+                      );
+                    }
+                    return const CircularProgressIndicator();
+                  },
+                ),
+              ),
               const Text(
                 '보낼 푸시 메시지 내용',
                 style: TextStyle(
