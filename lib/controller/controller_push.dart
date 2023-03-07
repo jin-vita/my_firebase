@@ -21,10 +21,10 @@ class PushController extends GetxController {
   Rx<RemoteMessage> myMessage = const RemoteMessage().obs;
 
   // FCM token from FCM instance
-  String fcmToken = '';
+  late String fcmToken;
 
   // FCM project id from google_key.json file
-  String projectId = '';
+  late String projectId;
 
   @override
   void onInit() {
@@ -52,9 +52,8 @@ class PushController extends GetxController {
 
   // generate FCM token
   Future<void> getToken() async {
-    final token = await messaging.getToken() ?? '토큰 가져오기 실패';
-    log.i('token : $token');
-    fcmToken = token;
+    fcmToken = await messaging.getToken() ?? '토큰 가져오기 실패';
+    log.i('token : $fcmToken');
   }
 
   // check received FCM message
@@ -76,11 +75,11 @@ class PushController extends GetxController {
       if (message.notification != null) {
         log.i('message: ${message.notification?.body}');
         myMessage.value = message;
-        // 웹??
+        // 웹에서는 수신을 안해서 스낵바 넣음
         Util.showSnackBar(message: message.notification?.body);
         flutterLocalNotificationsPlugin.show(
           message.hashCode,
-          'FCM 알림',
+          'FCM 수신',
           message.notification?.body,
           NotificationDetails(
             android: AndroidNotificationDetails(
