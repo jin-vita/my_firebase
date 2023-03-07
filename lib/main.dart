@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 
-import 'controller/controller_notification.dart';
+import 'controller/controller_push.dart';
 import 'controller/controller_user.dart';
 import 'firebase_options.dart';
 import 'page/page_auth.dart';
@@ -19,6 +19,7 @@ import 'page/page_menu.dart';
 // flutter pub add firebase_auth
 // flutter pub add google_sign_in
 // flutter pub add googleapis_auth
+// flutter pub add cloud_firestore
 // flutter pub add firebase_database
 // flutter pub add firebase_messaging
 // flutter pub add flutter_local_notifications
@@ -51,7 +52,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       initialBinding: BindingsBuilder(() {
-        Get.put(NotificationController());
+        Get.put(PushController());
         Get.put(UserController());
       }),
       initialRoute: '/auth',

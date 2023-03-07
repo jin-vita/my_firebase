@@ -10,9 +10,9 @@ import 'package:my_firebase/util/util.dart';
 
 import '../main.dart';
 
-class NotificationController extends GetxController {
+class PushController extends GetxController {
   // for easy to use
-  static NotificationController get to => Get.find();
+  static PushController get to => Get.find();
 
   // FCM instance
   FirebaseMessaging messaging = FirebaseMessaging.instance;
