@@ -89,7 +89,7 @@ class HomePage extends StatelessWidget {
                 ),
               ),
               const Text(
-                '보낼 푸시 메시지 내용',
+                '보낼 내용',
                 style: TextStyle(
                   fontSize: 18,
                 ),
