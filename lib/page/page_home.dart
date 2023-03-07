@@ -77,7 +77,7 @@ class HomePage extends StatelessWidget {
                             margin: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 8),
                             child: ListTile(
-                              title: Text(document['email']),
+                              title: Text(document['name']),
                               subtitle: Text(document['email']),
                             ),
                           );
