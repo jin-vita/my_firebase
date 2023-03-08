@@ -3,9 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:my_firebase/controller/controller_push.dart';
-import 'package:my_firebase/model/model_user.dart';
-
-import '../main.dart';
 
 class UserController extends GetxController {
   static UserController get to => Get.find();
@@ -13,14 +10,17 @@ class UserController extends GetxController {
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final FirebaseAuth auth = FirebaseAuth.instance;
   final CollectionReference userCollection =
-  FirebaseFirestore.instance.collection('user');
+      FirebaseFirestore.instance.collection('user');
+
+  // selected user
+  final selectedUser = Rx<DocumentSnapshot?>(null);
 
   Future<User?> signInWithGoogle() async {
     // 구글 로그인 인증 만들기
     final GoogleSignInAccount? googleSignInAccount =
-    await googleSignIn.signIn();
+        await googleSignIn.signIn();
     final GoogleSignInAuthentication googleAuth =
-    await googleSignInAccount!.authentication;
+        await googleSignInAccount!.authentication;
 
     // Firebase 인증 자격 증명 만들기
     final AuthCredential credential = GoogleAuthProvider.credential(
@@ -30,38 +30,35 @@ class UserController extends GetxController {
 
     // Firebase 에 자격 증명을 제출하여 인증
     final UserCredential authResult =
-    await auth.signInWithCredential(credential);
+        await auth.signInWithCredential(credential);
 
     // 로그인이 되었을 때
     if (authResult.user != null) {
       // search user by email from firestore
-      final Query userQuery =
-      userCollection.where('email', isEqualTo: auth.currentUser!.email);
-      final QuerySnapshot userSnap = await userQuery.get();
-
-      if (userSnap.docs.isEmpty) {
+      final Query query =
+          userCollection.where('email', isEqualTo: auth.currentUser!.email);
+      final QuerySnapshot snapshot = await query.get();
+      if (snapshot.docs.isEmpty) {
         await userCollection.add({
           'name': auth.currentUser!.displayName,
           'email': auth.currentUser!.email,
-          'token': PushController.to.fcmToken,
+          'token': PushController.to.myToken,
         });
       } else {
-        log.i('userSnap : ${userSnap.docs.first.data()}');
-
-        userCollection.doc(userSnap.docs.first.id).update({
+        userCollection.doc(snapshot.docs.first.id).update({
           'name': auth.currentUser!.displayName,
-          'token': PushController.to.fcmToken,
+          'token': PushController.to.myToken,
         });
 
         // cast to UserModel
-        final QuerySnapshot<UserModel> userCastSnap = await userQuery
-            .withConverter(
-          fromFirestore: UserModel.fromFirestore,
-          toFirestore: (UserModel user, _) => user.toFirestore(),
-        )
-            .get();
-        UserModel user = userCastSnap.docs.first.data();
-        log.i('userModel name : ${user.name}');
+        // final QuerySnapshot<UserModel> userCastSnap = await query
+        //     .withConverter(
+        //       fromFirestore: UserModel.fromFirestore,
+        //       toFirestore: (UserModel user, _) => user.toFirestore(),
+        //     )
+        //     .get();
+        // UserModel user = userCastSnap.docs.first.data();
+        // logger.i('userModel name : ${user.name}');
       }
     }
 
@@ -69,6 +66,7 @@ class UserController extends GetxController {
   }
 
   Future<void> signOutGoogle() async {
+    selectedUser.value = null;
     await googleSignIn.signOut();
     await auth.signOut();
   }

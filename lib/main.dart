@@ -3,11 +3,13 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
+import 'package:my_firebase/controller/controller_chat.dart';
 
 import 'controller/controller_push.dart';
 import 'controller/controller_user.dart';
 import 'firebase_options.dart';
 import 'page/page_auth.dart';
+import 'page/page_chat.dart';
 import 'page/page_home.dart';
 import 'page/page_menu.dart';
 
@@ -24,11 +26,11 @@ import 'page/page_menu.dart';
 // flutter pub add firebase_messaging
 // flutter pub add flutter_local_notifications
 
-final log = Logger();
+final logger = Logger();
 
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  log.i("background message : ${message.notification?.body}");
+  logger.i("background message : ${message.notification?.body}");
 }
 
 void main() async {
@@ -54,6 +56,7 @@ class MyApp extends StatelessWidget {
       initialBinding: BindingsBuilder(() {
         Get.put(PushController());
         Get.put(UserController());
+        Get.put(ChatController());
       }),
       initialRoute: '/auth',
       getPages: [
@@ -64,6 +67,12 @@ class MyApp extends StatelessWidget {
         GetPage(
           name: '/home',
           page: () => const HomePage(),
+        ),
+        GetPage(
+          name: '/chat',
+          page: () => const ChatPage(),
+          transition: Transition.downToUp,
+          transitionDuration: const Duration(milliseconds: 150),
         ),
         GetPage(
           name: '/menu',

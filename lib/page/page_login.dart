@@ -25,8 +25,8 @@ class LoginPage extends StatelessWidget {
               onPressed: () async {
                 final user = await UserController.to.signInWithGoogle();
                 if (user != null) {
-                  log.w(
-                      'user name : ${user.displayName}, user email : ${user.email}');
+                  logger.w(
+                      'LoginPage - name : ${user.displayName}, email : ${user.email}');
                   Get.offAllNamed('/auth');
                 }
               },
