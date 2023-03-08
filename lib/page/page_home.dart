@@ -58,7 +58,7 @@ class HomePage extends StatelessWidget {
                 }),
                 const SizedBox(height: 30),
                 const Text(
-                  '등록된 유저 리스트',
+                  '유저 리스트',
                   style: TextStyle(
                     fontSize: 18,
                   ),

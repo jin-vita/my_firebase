@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:my_firebase/controller/controller_chat.dart';
 
 import '../controller/controller_push.dart';
 import '../controller/controller_user.dart';
@@ -64,7 +66,7 @@ class ChatPage extends StatelessWidget {
             )),
             Row(
               children: [
-                const SizedBox(width: 20),
+                const SizedBox(width: 10),
                 Expanded(
                   child: TextField(
                     textAlign: TextAlign.center,
@@ -73,16 +75,26 @@ class ChatPage extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    final Query myQuery = UserController.to.userCollection
+                        .where('email', isEqualTo: UserController.to.auth.currentUser!.email);
+                    final QuerySnapshot mySnapshot = await myQuery.get();
+
+                    final query = ChatController.to.chatCollection.where('ids', arrayContains: mySnapshot.docs.first.id)
+                        .where('ids', arrayContains: UserController.to.selectedUser.call()?.id);
+                    final QuerySnapshot snapshot = await query.get();
+                    snapshot.docs.first.id
+
+
+
                     PushController.to.sendFcmMessage(textController.text);
                     textController.text = '';
                   },
                   child: const Text('전송'),
                 ),
-                const SizedBox(width: 20),
+                const SizedBox(width: 10),
               ],
             ),
-            const SizedBox(width: 40),
           ],
         ),
       ),
