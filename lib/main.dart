@@ -15,6 +15,7 @@ import 'page/page_menu.dart';
 
 // flutter pub add get
 // flutter pub add dio
+// flutter pub add intl
 // flutter pub add http
 // flutter pub add logger
 // flutter pub add firebase_core

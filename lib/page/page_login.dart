@@ -27,7 +27,7 @@ class LoginPage extends StatelessWidget {
                 if (user != null) {
                   logger.w(
                       'LoginPage - name : ${user.displayName}, email : ${user.email}');
-                  Get.offAllNamed('/auth');
+                  Get.toNamed('/auth');
                 }
               },
               child: const Text('구글 로그인'),

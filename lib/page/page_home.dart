@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_firebase/controller/controller_user.dart';
 
-import '../controller/controller_push.dart';
+import '../controller/controller_chat.dart';
 import '../util/util.dart';
 
 class HomePage extends StatelessWidget {
@@ -25,6 +25,7 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    UserController.to.initId();
     final textController = TextEditingController();
     return Scaffold(
       appBar: AppBar(
@@ -36,103 +37,64 @@ class HomePage extends StatelessWidget {
           return exit(context);
         },
         child: SingleChildScrollView(
-          child: Center(
-            child: Column(
-              children: [
-                const SizedBox(height: 30),
-                const Text(
-                  '수신한 푸시 메시지 내용',
-                  style: TextStyle(
-                    fontSize: 18,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Obx(() {
-                  final message =
-                      PushController.to.myMessage.value.notification;
-                  String text = '수신된 메시지가 없습니다.';
-                  if (message != null) {
-                    text = message.body ?? '수신된 메시지가 없습니다';
-                  }
-                  return Text(text);
-                }),
-                const SizedBox(height: 30),
-                const Text(
-                  '유저 리스트',
-                  style: TextStyle(
-                    fontSize: 18,
-                  ),
-                ),
-                SizedBox(
-                  height: 200,
-                  child: StreamBuilder(
-                    stream: UserController.to.userCollection
-                        .where('token', isNotEqualTo: 'init')
-                        .snapshots(),
-                    builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                      if (snapshot.hasData) {
-                        return ListView.builder(
-                          itemCount: snapshot.data!.docs.length,
-                          itemBuilder: (context, index) {
-                            final DocumentSnapshot document =
-                                snapshot.data!.docs[index];
-                            return GestureDetector(
-                              onTap: () {
-                                UserController.to.selectedUser.value = document;
-                                Get.toNamed('/chat');
-                              },
-                              child: Card(
-                                margin: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 8),
-                                child: ListTile(
-                                  title: Text(document['name']),
-                                  subtitle: Text(document['email']),
-                                ),
+          child: Column(
+            children: [
+              Container(
+                color: Colors.grey.shade200,
+                height: MediaQuery.of(context).size.height,
+                padding: const EdgeInsets.only(top: 15),
+                child: StreamBuilder(
+                  stream: UserController.to.userCollection
+                      .where('token', isNotEqualTo: 'init')
+                      .snapshots(),
+                  builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (snapshot.hasData) {
+                      return ListView.builder(
+                        itemCount: snapshot.data!.docs.length,
+                        itemBuilder: (context, index) {
+                          final DocumentSnapshot document =
+                              snapshot.data!.docs[index];
+                          return GestureDetector(
+                            onTap: () async {
+                              UserController.to.selectedUser.value = document;
+                              List ids = [
+                                UserController.to.user.id,
+                                document.id
+                              ];
+                              ids.sort((a, b) => a.compareTo(b));
+                              String chatId = ids.join('_');
+                              final chatDocument =
+                                  ChatController.to.chatCollection.doc(chatId);
+                              await chatDocument.set({
+                                'name': '테스트채팅방??',
+                                'created_at': FieldValue.serverTimestamp(),
+                                'updated_at': FieldValue.serverTimestamp(),
+                              });
+                              // await chatDocument.collection('message').add({
+                              //   'sender': UserController.to.user['name'],
+                              //   'created_at': FieldValue.serverTimestamp(),
+                              //   'text': '안녕?',
+                              // });
+
+                              Get.toNamed('/chat', arguments: chatDocument);
+                            },
+                            child: Card(
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                              child: ListTile(
+                                title: Text(document['name']),
+                                subtitle: Text(document['email']),
                               ),
-                            );
-                          },
-                        );
-                      }
-                      return const CircularProgressIndicator();
-                    },
-                  ),
-                ),
-                const Text(
-                  '메시지 보낼 대상',
-                  style: TextStyle(
-                    fontSize: 18,
-                  ),
-                ),
-                Obx(
-                  () => UserController.to.selectedUser.call() != null
-                      ? Text(UserController.to.selectedUser.call()?['name'])
-                      : const Text('선택된 대상이 없습니다'),
-                ),
-                const SizedBox(height: 30),
-                const Text(
-                  '보낼 메시지 내용',
-                  style: TextStyle(
-                    fontSize: 18,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  width: 200,
-                  child: TextField(
-                    textAlign: TextAlign.center,
-                    controller: textController,
-                  ),
-                ),
-                const SizedBox(height: 30),
-                ElevatedButton(
-                  onPressed: () {
-                    PushController.to.sendFcmMessage(textController.text);
-                    textController.text = '';
+                            ),
+                          );
+                        },
+                      );
+                    }
+                    return const CircularProgressIndicator();
                   },
-                  child: const Text('푸시 전송'),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

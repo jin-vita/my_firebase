@@ -74,7 +74,7 @@ class PushController extends GetxController {
     var flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
     await flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>()
+            AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -82,7 +82,7 @@ class PushController extends GetxController {
         logger.i('message: ${message.notification?.body}');
         myMessage.value = message;
         // 웹에서는 수신을 안해서 스낵바 넣음
-        Util.showSnackBar(message: message.notification?.body);
+        // Util.showSnackBar(message: message.notification?.body);
         flutterLocalNotificationsPlugin.show(
           message.hashCode,
           'FCM 수신',
@@ -103,18 +103,18 @@ class PushController extends GetxController {
         );
 
         const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('mipmap/ic_launcher');
+            AndroidInitializationSettings('mipmap/ic_launcher');
         const DarwinInitializationSettings initializationSettingsIOS =
-        DarwinInitializationSettings();
+            DarwinInitializationSettings();
         const InitializationSettings initializationSettings =
-        InitializationSettings(
-            android: initializationSettingsAndroid,
-            iOS: initializationSettingsIOS);
+            InitializationSettings(
+                android: initializationSettingsAndroid,
+                iOS: initializationSettingsIOS);
 
         flutterLocalNotificationsPlugin.initialize(initializationSettings,
             onDidReceiveNotificationResponse: (NotificationResponse payload) {
-              Get.toNamed('/menu', arguments: payload);
-            });
+          Get.toNamed('/menu', arguments: payload);
+        });
       }
     });
   }
@@ -122,7 +122,7 @@ class PushController extends GetxController {
   // background FCM message click action
   Future<void> setupInteractedMessage() async {
     RemoteMessage? initialMessage =
-    await FirebaseMessaging.instance.getInitialMessage();
+        await FirebaseMessaging.instance.getInitialMessage();
 
     // 종료상태에서 클릭한 푸시 알림 메세지 핸들링
     if (initialMessage != null) handleMessage(initialMessage);
@@ -141,13 +141,13 @@ class PushController extends GetxController {
 
   Future<String> getGoogleOAuth2Token() async {
     final String jsonString =
-    await rootBundle.loadString('assets/google_key.json');
+        await rootBundle.loadString('assets/google_key.json');
     final Map<String, dynamic> json = jsonDecode(jsonString);
     projectId = json['project_id'];
     final serviceAccountCredentials = ServiceAccountCredentials.fromJson(json);
     final scopes = ['https://www.googleapis.com/auth/firebase.messaging'];
     final client =
-    await clientViaServiceAccount(serviceAccountCredentials, scopes);
+        await clientViaServiceAccount(serviceAccountCredentials, scopes);
     final accessCredentials = client.credentials.accessToken;
     return accessCredentials.data;
   }

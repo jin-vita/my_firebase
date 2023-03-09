@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:my_firebase/controller/controller_push.dart';
 
+import '../main.dart';
+
 class UserController extends GetxController {
   static UserController get to => Get.find();
 
@@ -14,6 +16,16 @@ class UserController extends GetxController {
 
   // selected user
   final selectedUser = Rx<DocumentSnapshot?>(null);
+
+  late DocumentSnapshot user;
+
+  Future initId() async {
+    final Query myQuery =
+        userCollection.where('email', isEqualTo: auth.currentUser!.email);
+    final QuerySnapshot mySnapshot = await myQuery.get();
+    user = mySnapshot.docs.first;
+    logger.i('myId : ${user.id}');
+  }
 
   Future<User?> signInWithGoogle() async {
     // 구글 로그인 인증 만들기
