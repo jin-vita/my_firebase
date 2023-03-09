@@ -48,6 +48,8 @@ dependencies:
   google_sign_in: ^6.0.2
   cloud_firestore: ^4.4.3
   intl: ^0.17.0
+  scroll_bottom_navigation_bar: ^4.0.0
+  scroll_app_bar: ^2.0.0
 
 dev_dependencies:
   flutter_test:

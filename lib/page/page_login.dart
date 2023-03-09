@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:my_firebase/controller/controller_user.dart';
 
-import '../main.dart';
-
 class LoginPage extends StatelessWidget {
   const LoginPage({Key? key}) : super(key: key);
 
@@ -25,8 +23,6 @@ class LoginPage extends StatelessWidget {
               onPressed: () async {
                 final user = await UserController.to.signInWithGoogle();
                 if (user != null) {
-                  logger.w(
-                      'LoginPage - name : ${user.displayName}, email : ${user.email}');
                   Get.toNamed('/auth');
                 }
               },

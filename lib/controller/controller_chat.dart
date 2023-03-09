@@ -11,13 +11,11 @@ class ChatController extends GetxController {
   Future createChat() async {
     final Query query = chatCollection
         .where('ids', arrayContains: UserController.to.user.id)
-        .where('ids', arrayContains: UserController.to.selectedUser.call()?.id);
+        .where('ids', arrayContains: UserController.to.selectedUser.id);
     final QuerySnapshot snapshot = await query.get();
     if (snapshot.docs.isEmpty) {
       chatCollection.add({
-        'ids': '${UserController.to.user.id},${UserController.to.selectedUser}',
-        'name': '${UserController.to.selectedUser.call()?['name']}님 과의 채팅',
-        'is_group': false,
+        'name': '채팅',
         'created_at': Timestamp.now(),
         'updated_at': Timestamp.now(),
       });

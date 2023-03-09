@@ -15,13 +15,12 @@ class UserController extends GetxController {
       FirebaseFirestore.instance.collection('user');
 
   // selected user
-  final selectedUser = Rx<DocumentSnapshot?>(null);
+  late DocumentSnapshot selectedUser;
 
   late DocumentSnapshot user;
 
-  Future initId() async {
-    final Query myQuery =
-        userCollection.where('email', isEqualTo: auth.currentUser!.email);
+  Future initId(String? email) async {
+    final Query myQuery = userCollection.where('email', isEqualTo: email);
     final QuerySnapshot mySnapshot = await myQuery.get();
     user = mySnapshot.docs.first;
     logger.i('myId : ${user.id}');
@@ -52,13 +51,15 @@ class UserController extends GetxController {
       final QuerySnapshot snapshot = await query.get();
       if (snapshot.docs.isEmpty) {
         await userCollection.add({
-          'name': auth.currentUser!.displayName,
+          'name': '${auth.currentUser!.displayName} ',
           'email': auth.currentUser!.email,
+          'photo': auth.currentUser!.photoURL,
           'token': PushController.to.myToken,
         });
       } else {
         userCollection.doc(snapshot.docs.first.id).update({
           'name': auth.currentUser!.displayName,
+          'photo': auth.currentUser!.photoURL,
           'token': PushController.to.myToken,
         });
 
@@ -78,7 +79,6 @@ class UserController extends GetxController {
   }
 
   Future<void> signOutGoogle() async {
-    selectedUser.value = null;
     await googleSignIn.signOut();
     await auth.signOut();
   }

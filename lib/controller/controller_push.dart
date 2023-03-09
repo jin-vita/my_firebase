@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
@@ -10,6 +11,7 @@ import 'package:my_firebase/controller/controller_user.dart';
 import 'package:my_firebase/util/util.dart';
 
 import '../main.dart';
+import 'controller_chat.dart';
 
 class PushController extends GetxController {
   // for easy to use
@@ -17,9 +19,6 @@ class PushController extends GetxController {
 
   // FCM instance
   FirebaseMessaging messaging = FirebaseMessaging.instance;
-
-  // received message
-  Rx<RemoteMessage> myMessage = const RemoteMessage().obs;
 
   // FCM token from FCM instance
   late String myToken;
@@ -80,7 +79,6 @@ class PushController extends GetxController {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       if (message.notification != null) {
         logger.i('message: ${message.notification?.body}');
-        myMessage.value = message;
         // 웹에서는 수신을 안해서 스낵바 넣음
         // Util.showSnackBar(message: message.notification?.body);
         flutterLocalNotificationsPlugin.show(
@@ -112,8 +110,17 @@ class PushController extends GetxController {
                 iOS: initializationSettingsIOS);
 
         flutterLocalNotificationsPlugin.initialize(initializationSettings,
-            onDidReceiveNotificationResponse: (NotificationResponse payload) {
-          Get.toNamed('/menu', arguments: payload);
+            onDidReceiveNotificationResponse:
+                (NotificationResponse payload) async {
+          final Query query = UserController.to.userCollection
+              .where('__name__', isEqualTo: message.notification?.title);
+          final QuerySnapshot snapshot = await query.get();
+          UserController.to.selectedUser = snapshot.docs.first;
+          List ids = [UserController.to.user.id, message.notification?.title];
+          ids.sort((a, b) => a.compareTo(b));
+          String chatId = ids.join('_');
+          final chatDocument = ChatController.to.chatCollection.doc(chatId);
+          Get.toNamed('/chat', arguments: chatDocument);
         });
       }
     });
@@ -131,9 +138,19 @@ class PushController extends GetxController {
     FirebaseMessaging.onMessageOpenedApp.listen(handleMessage);
   }
 
-  void handleMessage(RemoteMessage message) {
+  Future handleMessage(RemoteMessage message) async {
     logger.w('background message : ${message.notification?.body}');
-    myMessage.value = message;
+
+    final Query query = UserController.to.userCollection
+        .where('__name__', isEqualTo: message.notification?.title);
+    final QuerySnapshot snapshot = await query.get();
+    UserController.to.selectedUser = snapshot.docs.first;
+    List ids = [UserController.to.user.id, message.notification?.title];
+    ids.sort((a, b) => a.compareTo(b));
+    String chatId = ids.join('_');
+    final chatDocument = ChatController.to.chatCollection.doc(chatId);
+    Get.toNamed('/chat', arguments: chatDocument);
+
     // if (message.data['type'] == 'chat') {
     //   Get.toNamed('/chat', arguments: message.data);
     // }
@@ -153,7 +170,7 @@ class PushController extends GetxController {
   }
 
   Future<void> sendFcmMessage(String text) async {
-    if (UserController.to.selectedUser.call()?['token'] == '') {
+    if (UserController.to.selectedUser['token'] == '') {
       Util.showSnackBar(message: '선택된 대상이 없습니다.');
       return;
     }
@@ -166,9 +183,10 @@ class PushController extends GetxController {
 
     Map<String, dynamic> message = {
       'message': {
-        'token': UserController.to.selectedUser.call()?['token'],
+        'token': UserController.to.selectedUser['token'],
         'notification': {
           'body': text,
+          'title': UserController.to.user.id,
         },
       },
     };
@@ -176,6 +194,6 @@ class PushController extends GetxController {
     final response = await dio.post(
         'https://fcm.googleapis.com/v1/projects/$projectId/messages:send',
         data: message);
-    logger.w('response : ${response.data}');
+    // logger.w('response : ${response.data}');
   }
 }

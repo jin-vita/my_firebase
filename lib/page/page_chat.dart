@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 import '../controller/controller_push.dart';
 import '../controller/controller_user.dart';
@@ -15,7 +16,7 @@ class ChatPage extends StatelessWidget {
     final textController = TextEditingController();
     return Scaffold(
       appBar: AppBar(
-        title: Text('${UserController.to.selectedUser.call()?['name']}님과의 채팅'),
+        title: Text('${UserController.to.selectedUser['name']}님과의 채팅'),
       ),
       body: Column(
         children: [
@@ -46,9 +47,11 @@ class ChatPage extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final DocumentSnapshot document =
                               snapshot.data!.docs[index];
-                          // DateTime dateTime = document['created_at'].toDate();
-                          // String formattedDateTime =
-                          //     DateFormat('HH:mm').format(dateTime);
+                          DateTime dateTime = document['created_at'] != null
+                              ? document['created_at'].toDate()
+                              : DateTime.now();
+                          String formattedDateTime =
+                              DateFormat('HH:mm').format(dateTime);
                           return GestureDetector(
                             onTap: () {},
                             child: Card(
@@ -59,11 +62,12 @@ class ChatPage extends StatelessWidget {
                               margin: document['sender'] ==
                                       UserController.to.user['name']
                                   ? const EdgeInsets.only(
-                                      top: 5, bottom: 5, left: 50, right: 5)
+                                      top: 5, bottom: 5, left: 60, right: 5)
                                   : const EdgeInsets.only(
-                                      top: 5, bottom: 5, left: 5, right: 50),
+                                      top: 5, bottom: 5, left: 5, right: 60),
                               child: ListTile(
-                                title: Text(document['text']),
+                                title: Text(
+                                    '${document['text']} $formattedDateTime'),
                                 // subtitle: Text(formattedDateTime),
                               ),
                             ),
@@ -91,13 +95,14 @@ class ChatPage extends StatelessWidget {
               const SizedBox(width: 10),
               ElevatedButton(
                 onPressed: () async {
+                  String message = textController.text;
+                  textController.text = '';
                   await Get.arguments.collection('message').add({
                     'sender': UserController.to.user['name'],
                     'created_at': FieldValue.serverTimestamp(),
-                    'text': textController.text,
+                    'text': message,
                   });
-                  PushController.to.sendFcmMessage(textController.text);
-                  textController.text = '';
+                  PushController.to.sendFcmMessage(message);
                 },
                 child: const Text('전송'),
               ),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 import 'package:my_firebase/controller/controller_chat.dart';
+import 'package:my_firebase/controller/controller_ui.dart';
 
 import 'controller/controller_push.dart';
 import 'controller/controller_user.dart';
@@ -20,14 +21,17 @@ import 'page/page_menu.dart';
 // flutter pub add logger
 // flutter pub add firebase_core
 // flutter pub add firebase_auth
+// flutter pub add scroll_app_bar
 // flutter pub add google_sign_in
 // flutter pub add googleapis_auth
 // flutter pub add cloud_firestore
 // flutter pub add firebase_database
 // flutter pub add firebase_messaging
 // flutter pub add flutter_local_notifications
+// flutter pub add scroll_bottom_navigation_bar
 
 final logger = Logger();
+final controller = ScrollController();
 
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -58,6 +62,7 @@ class MyApp extends StatelessWidget {
         Get.put(PushController());
         Get.put(UserController());
         Get.put(ChatController());
+        Get.put(UiController());
       }),
       initialRoute: '/auth',
       getPages: [
