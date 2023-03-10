@@ -22,5 +22,28 @@ class ChatController extends GetxController {
     }
   }
 
-  Future getMessages() async {}
+// Future<QuerySnapshot> getCachedQuery(String collection) async {
+//   final cacheManager = await CacheManager.getInstance();
+//   final file = await cacheManager.getFileFromCache(collection);
+//
+//   if (file != null && file.existsSync()) {
+//     final data = file.readAsStringSync();
+//     return QuerySnapshot.fromSnapshot(json.decode(data));
+//   } else {
+//     final query = FirebaseFirestore.instance.collection(collection);
+//     final snapshot = await query.get();
+//     await cacheManager.putFileInCache(
+//         collection, json.encode(snapshot.data()));
+//     return snapshot;
+//   }
+// }
+//
+// Future<List<ChatMessage>> getChatMessages(String chatId) async {
+//   final snapshot = await getCachedQuery('chats/$chatId/messages');
+//   final messages = snapshot.docs
+//       .map((doc) => ChatMessage.fromFirestore(doc))
+//       .toList();
+//
+//   return messages;
+// }
 }
