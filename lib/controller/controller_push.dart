@@ -8,10 +8,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:my_firebase/controller/controller_user.dart';
-import 'package:my_firebase/util/util.dart';
 
 import '../main.dart';
-import 'controller_chat.dart';
 
 class PushController extends GetxController {
   // for easy to use
@@ -25,6 +23,8 @@ class PushController extends GetxController {
 
   // FCM project id from google_key.json file
   late String projectId;
+
+  bool isChatPage = false;
 
   @override
   void onInit() {
@@ -81,24 +81,29 @@ class PushController extends GetxController {
         logger.i('message: ${message.notification?.body}');
         // 웹에서는 수신을 안해서 스낵바 넣음
         // Util.showSnackBar(message: message.notification?.body);
-        flutterLocalNotificationsPlugin.show(
-          message.hashCode,
-          'FCM 수신',
-          message.notification?.body,
-          NotificationDetails(
-            android: AndroidNotificationDetails(
-              channel.id,
-              channel.name,
-              channelDescription: channel.description,
-              icon: '@mipmap/ic_launcher',
+        if (!isChatPage ||
+            !message.data['chat_id']
+                .toString()
+                .contains(UserController.to.selectedUser.id)) {
+          flutterLocalNotificationsPlugin.show(
+            message.hashCode,
+            'MY 메시지',
+            message.notification?.body,
+            NotificationDetails(
+              android: AndroidNotificationDetails(
+                channel.id,
+                channel.name,
+                channelDescription: channel.description,
+                icon: '@mipmap/ic_launcher',
+              ),
+              iOS: const DarwinNotificationDetails(
+                badgeNumber: 1,
+                subtitle: 'the subtitle',
+                sound: 'slow_spring_board.aiff',
+              ),
             ),
-            iOS: const DarwinNotificationDetails(
-              badgeNumber: 1,
-              subtitle: 'the subtitle',
-              sound: 'slow_spring_board.aiff',
-            ),
-          ),
-        );
+          );
+        }
 
         const AndroidInitializationSettings initializationSettingsAndroid =
             AndroidInitializationSettings('mipmap/ic_launcher');
@@ -110,17 +115,12 @@ class PushController extends GetxController {
                 iOS: initializationSettingsIOS);
 
         flutterLocalNotificationsPlugin.initialize(initializationSettings,
-            onDidReceiveNotificationResponse:
-                (NotificationResponse payload) async {
-          final Query query = UserController.to.userCollection
-              .where('__name__', isEqualTo: message.notification?.title);
-          final QuerySnapshot snapshot = await query.get();
-          UserController.to.selectedUser = snapshot.docs.first;
-          List ids = [UserController.to.user.id, message.notification?.title];
-          ids.sort((a, b) => a.compareTo(b));
-          String chatId = ids.join('_');
-          final chatDocument = ChatController.to.chatCollection.doc(chatId);
-          Get.toNamed('/chat', arguments: chatDocument);
+            onDidReceiveNotificationResponse: (NotificationResponse payload) {
+          Get.toNamed('/chat', arguments: [
+            message.data['chat_id'],
+            message.data['sender_name'],
+            message.data['sender_id'],
+          ]);
         });
       }
     });
@@ -138,18 +138,12 @@ class PushController extends GetxController {
     FirebaseMessaging.onMessageOpenedApp.listen(handleMessage);
   }
 
-  Future handleMessage(RemoteMessage message) async {
-    logger.w('background message : ${message.notification?.body}');
-
-    final Query query = UserController.to.userCollection
-        .where('__name__', isEqualTo: message.notification?.title);
-    final QuerySnapshot snapshot = await query.get();
-    UserController.to.selectedUser = snapshot.docs.first;
-    List ids = [UserController.to.user.id, message.notification?.title];
-    ids.sort((a, b) => a.compareTo(b));
-    String chatId = ids.join('_');
-    final chatDocument = ChatController.to.chatCollection.doc(chatId);
-    Get.toNamed('/chat', arguments: chatDocument);
+  void handleMessage(RemoteMessage message) {
+    Get.toNamed('/chat', arguments: [
+      message.data['chat_id'],
+      message.data['sender_name'],
+      message.data['sender_id'],
+    ]);
 
     // if (message.data['type'] == 'chat') {
     //   Get.toNamed('/chat', arguments: message.data);
@@ -169,9 +163,18 @@ class PushController extends GetxController {
     return accessCredentials.data;
   }
 
-  Future<void> sendFcmMessage(String text) async {
-    if (UserController.to.selectedUser['token'] == '') {
-      Util.showSnackBar(message: '선택된 대상이 없습니다.');
+  Future<void> sendFcmMessage(
+    String text,
+    String chatId,
+    String sender,
+    String userDocumentId,
+  ) async {
+    final QuerySnapshot snapshot = await UserController.to.userCollection
+        .where('__name__', isEqualTo: userDocumentId)
+        .get();
+    String token = snapshot.docs.first['token'];
+    if (token == 'logout') {
+      logger.w('${snapshot.docs.first['name']} is logged out');
       return;
     }
 
@@ -183,10 +186,15 @@ class PushController extends GetxController {
 
     Map<String, dynamic> message = {
       'message': {
-        'token': UserController.to.selectedUser['token'],
+        'token': token,
+        'data': {
+          'chat_id': chatId,
+          'sender_name': sender,
+          'sender_id': UserController.to.user.id,
+        },
         'notification': {
           'body': text,
-          'title': UserController.to.user.id,
+          'title': 'MY 메시지',
         },
       },
     };

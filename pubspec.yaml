@@ -50,6 +50,7 @@ dependencies:
   intl: ^0.17.0
   scroll_bottom_navigation_bar: ^4.0.0
   scroll_app_bar: ^2.0.0
+  cached_network_image: ^3.2.3
 
 dev_dependencies:
   flutter_test:

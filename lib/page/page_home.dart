@@ -20,6 +20,11 @@ class HomePage extends StatelessWidget {
       onNoPressed: () => Get.back(),
       yesText: '예',
       onYesPressed: () async {
+        await UserController.to.userCollection
+            .doc(UserController.to.user.id)
+            .update({
+          'token': 'logout',
+        });
         await UserController.to.signOutGoogle();
         Get.offAllNamed('/auth');
       },
@@ -56,12 +61,20 @@ class HomePage extends StatelessWidget {
                   String chatId = ids.join('_');
                   final chatDocument =
                       ChatController.to.chatCollection.doc(chatId);
-                  await chatDocument.set({
-                    'name': '나와의 채팅방',
-                    'created_at': FieldValue.serverTimestamp(),
-                    'updated_at': FieldValue.serverTimestamp(),
-                  });
-                  Get.toNamed('/chat', arguments: chatDocument);
+                  DocumentSnapshot chatSnapshot = await chatDocument.get();
+                  chatSnapshot.exists
+                      ? await chatDocument.update({
+                          'updated_at': FieldValue.serverTimestamp(),
+                        })
+                      : await chatDocument.set({
+                          'created_at': FieldValue.serverTimestamp(),
+                          'updated_at': FieldValue.serverTimestamp(),
+                        });
+                  Get.toNamed('/chat', arguments: [
+                    chatId,
+                    UserController.to.selectedUser['name'],
+                    UserController.to.selectedUser.id,
+                  ]);
                 },
                 child: ListTile(
                   leading: CircleAvatar(
@@ -109,18 +122,32 @@ class HomePage extends StatelessWidget {
                               String chatId = ids.join('_');
                               final chatDocument =
                                   ChatController.to.chatCollection.doc(chatId);
-                              await chatDocument.set({
-                                'name': '테스트채팅방??',
-                                'created_at': FieldValue.serverTimestamp(),
-                                'updated_at': FieldValue.serverTimestamp(),
-                              });
+
+                              DocumentSnapshot chatSnapshot =
+                                  await chatDocument.get();
+                              chatSnapshot.exists
+                                  ? await chatDocument.update({
+                                      'updated_at':
+                                          FieldValue.serverTimestamp(),
+                                    })
+                                  : await chatDocument.set({
+                                      'created_at':
+                                          FieldValue.serverTimestamp(),
+                                      'updated_at':
+                                          FieldValue.serverTimestamp(),
+                                    });
+
                               // await chatDocument.collection('message').add({
                               //   'sender': UserController.to.user['name'],
                               //   'created_at': FieldValue.serverTimestamp(),
                               //   'text': '안녕?',
                               // });
 
-                              Get.toNamed('/chat', arguments: chatDocument);
+                              Get.toNamed('/chat', arguments: [
+                                chatId,
+                                UserController.to.selectedUser['name'],
+                                UserController.to.selectedUser.id,
+                              ]);
                             },
                             child: ListTile(
                               leading: CircleAvatar(
