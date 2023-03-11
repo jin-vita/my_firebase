@@ -53,8 +53,7 @@ class HomePage extends StatelessWidget {
               const SizedBox(height: 10),
               GestureDetector(
                 onTap: () {
-                  UserController.to.selectedUser = UserController.to.user;
-                  ChatController.to.createChatRoom();
+                  ChatController.to.createChatRoom(UserController.to.user);
                 },
                 child: ListTile(
                   leading: CircleAvatar(
@@ -96,9 +95,8 @@ class HomePage extends StatelessWidget {
                           final DocumentSnapshot document =
                               snapshot.data!.docs[index];
                           return GestureDetector(
-                            onTap: () async {
-                              UserController.to.selectedUser = document;
-                              ChatController.to.createChatRoom();
+                            onTap: () {
+                              ChatController.to.createChatRoom(document);
                             },
                             child: ListTile(
                               leading: CircleAvatar(

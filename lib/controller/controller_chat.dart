@@ -1,17 +1,32 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:my_firebase/controller/controller_user.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatController extends GetxController {
   static ChatController get to => Get.find();
+  late SharedPreferences prefs;
 
   final CollectionReference chatCollection =
       FirebaseFirestore.instance.collection('chat');
 
-  Future createChatRoom() async {
+  @override
+  void onInit() {
+    initSharedPreferences();
+    super.onInit();
+  }
+
+  Future initSharedPreferences() async {
+    prefs = await SharedPreferences.getInstance();
+  }
+
+  Future createChatRoom(DocumentSnapshot selected) async {
+    UserController.to.selectedUser = selected;
     List ids = [
       UserController.to.user.id,
-      UserController.to.selectedUser.id,
+      selected.id,
     ];
     ids.sort((a, b) => a.compareTo(b));
     String chatId = ids.join('_');
@@ -27,13 +42,15 @@ class ChatController extends GetxController {
           });
     Get.toNamed('/chat', arguments: [
       chatId,
-      UserController.to.selectedUser['name'],
-      UserController.to.selectedUser.id,
+      selected['name'],
+      selected.id,
     ]);
   }
 
-  Future createMessage(
-      {required String chatRoomId, required String text}) async {
+  Future createMessage({
+    required String chatRoomId,
+    required String text,
+  }) async {
     await chatCollection.doc(chatRoomId).collection('message').add({
       'sender': UserController.to.user['name'],
       'created_at': FieldValue.serverTimestamp(),
@@ -41,27 +58,23 @@ class ChatController extends GetxController {
     });
   }
 
-// Future<QuerySnapshot> getCachedQuery(String collection) async {
-//   final cacheManager = await CacheManager.getInstance();
-//   final file = await cacheManager.getFileFromCache(collection);
-//
-//   if (file != null && file.existsSync()) {
-//     final data = file.readAsStringSync();
-//     return QuerySnapshot.fromSnapshot(json.decode(data));
-//   } else {
-//     final query = FirebaseFirestore.instance.collection(collection);
-//     final snapshot = await query.get();
-//     await cacheManager.putFileInCache(
-//         collection, json.encode(snapshot.data()));
-//     return snapshot;
-//   }
-// }
-//
-//   Future<List<ChatMessage>> getChatMessages(String chatId) async {
-//     final snapshot = await getCachedQuery('chats/$chatId/messages');
-//     final messages =
-//         snapshot.docs.map((doc) => ChatMessage.fromFirestore(doc)).toList();
-//
-//     return messages;
-//   }
+  Future saveMessageList(String chatRoomId) async {
+    QuerySnapshot messageQuerySnapshot = await ChatController.to.chatCollection
+        .doc(chatRoomId)
+        .collection('message')
+        .orderBy('created_at', descending: true)
+        .limit(10)
+        .get();
+
+    List<String> messageList = [];
+    for (var element in messageQuerySnapshot.docs) {
+      Map<String, dynamic> map = {};
+      map['sender'] = element['sender'];
+      map['created_at'] = element['created_at'].toString();
+      map['text'] = element['text'];
+      messageList.add(jsonEncode(map));
+    }
+    // logger.e(messageList);
+    prefs.setStringList(chatRoomId, messageList);
+  }
 }

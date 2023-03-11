@@ -27,7 +27,9 @@ import 'page/page_menu.dart';
 // flutter pub add cloud_firestore
 // flutter pub add firebase_database
 // flutter pub add firebase_messaging
+// flutter pub add shared_preferences
 // flutter pub add cached_network_image
+// flutter pub add flutter_cache_manager
 // flutter pub add flutter_local_notifications
 // flutter pub add scroll_bottom_navigation_bar
 
@@ -78,8 +80,7 @@ class MyApp extends StatelessWidget {
         GetPage(
           name: '/chat',
           page: () => const ChatPage(),
-          transition: Transition.downToUp,
-          transitionDuration: const Duration(milliseconds: 150),
+          transition: Transition.rightToLeft,
         ),
         GetPage(
           name: '/menu',
