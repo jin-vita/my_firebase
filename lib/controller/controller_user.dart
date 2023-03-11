@@ -19,7 +19,7 @@ class UserController extends GetxController {
 
   late DocumentSnapshot user;
 
-  Future initId(String? email) async {
+  Future initUser(String? email) async {
     final Query myQuery = userCollection.where('email', isEqualTo: email);
     final QuerySnapshot mySnapshot = await myQuery.get();
     user = mySnapshot.docs.first;

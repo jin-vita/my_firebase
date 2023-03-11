@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -51,35 +52,18 @@ class HomePage extends StatelessWidget {
             children: [
               const SizedBox(height: 10),
               GestureDetector(
-                onTap: () async {
+                onTap: () {
                   UserController.to.selectedUser = UserController.to.user;
-                  List ids = [
-                    UserController.to.user.id,
-                    UserController.to.user.id,
-                  ];
-                  ids.sort((a, b) => a.compareTo(b));
-                  String chatId = ids.join('_');
-                  final chatDocument =
-                      ChatController.to.chatCollection.doc(chatId);
-                  DocumentSnapshot chatSnapshot = await chatDocument.get();
-                  chatSnapshot.exists
-                      ? await chatDocument.update({
-                          'updated_at': FieldValue.serverTimestamp(),
-                        })
-                      : await chatDocument.set({
-                          'created_at': FieldValue.serverTimestamp(),
-                          'updated_at': FieldValue.serverTimestamp(),
-                        });
-                  Get.toNamed('/chat', arguments: [
-                    chatId,
-                    UserController.to.selectedUser['name'],
-                    UserController.to.selectedUser.id,
-                  ]);
+                  ChatController.to.createChatRoom();
                 },
                 child: ListTile(
                   leading: CircleAvatar(
-                      backgroundImage: NetworkImage(
-                          UserController.to.auth.currentUser!.photoURL!)),
+                    backgroundImage: CachedNetworkImageProvider(
+                      UserController.to.auth.currentUser!.photoURL!,
+                    ),
+                    // backgroundImage: NetworkImage(
+                    //     UserController.to.auth.currentUser!.photoURL!),
+                  ),
                   title: Text(
                       '${UserController.to.auth.currentUser!.displayName} ✔'),
                   subtitle: Text(UserController.to.auth.currentUser!.email!),
@@ -114,45 +98,15 @@ class HomePage extends StatelessWidget {
                           return GestureDetector(
                             onTap: () async {
                               UserController.to.selectedUser = document;
-                              List ids = [
-                                UserController.to.user.id,
-                                document.id
-                              ];
-                              ids.sort((a, b) => a.compareTo(b));
-                              String chatId = ids.join('_');
-                              final chatDocument =
-                                  ChatController.to.chatCollection.doc(chatId);
-
-                              DocumentSnapshot chatSnapshot =
-                                  await chatDocument.get();
-                              chatSnapshot.exists
-                                  ? await chatDocument.update({
-                                      'updated_at':
-                                          FieldValue.serverTimestamp(),
-                                    })
-                                  : await chatDocument.set({
-                                      'created_at':
-                                          FieldValue.serverTimestamp(),
-                                      'updated_at':
-                                          FieldValue.serverTimestamp(),
-                                    });
-
-                              // await chatDocument.collection('message').add({
-                              //   'sender': UserController.to.user['name'],
-                              //   'created_at': FieldValue.serverTimestamp(),
-                              //   'text': '안녕?',
-                              // });
-
-                              Get.toNamed('/chat', arguments: [
-                                chatId,
-                                UserController.to.selectedUser['name'],
-                                UserController.to.selectedUser.id,
-                              ]);
+                              ChatController.to.createChatRoom();
                             },
                             child: ListTile(
                               leading: CircleAvatar(
-                                backgroundImage:
-                                    NetworkImage(document['photo']),
+                                backgroundImage: CachedNetworkImageProvider(
+                                  document['photo'],
+                                ),
+                                // backgroundImage:
+                                //     NetworkImage(document['photo']),
                               ),
                               title: Text(document['name']),
                               subtitle: Text(document['email']),
@@ -161,7 +115,7 @@ class HomePage extends StatelessWidget {
                         },
                       );
                     }
-                    return const CircularProgressIndicator();
+                    return const Center(child: CircularProgressIndicator());
                   },
                 ),
               ),

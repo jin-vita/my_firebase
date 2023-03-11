@@ -8,18 +8,37 @@ class ChatController extends GetxController {
   final CollectionReference chatCollection =
       FirebaseFirestore.instance.collection('chat');
 
-  Future createChat() async {
-    final Query query = chatCollection
-        .where('ids', arrayContains: UserController.to.user.id)
-        .where('ids', arrayContains: UserController.to.selectedUser.id);
-    final QuerySnapshot snapshot = await query.get();
-    if (snapshot.docs.isEmpty) {
-      chatCollection.add({
-        'name': '채팅',
-        'created_at': Timestamp.now(),
-        'updated_at': Timestamp.now(),
-      });
-    }
+  Future createChatRoom() async {
+    List ids = [
+      UserController.to.user.id,
+      UserController.to.selectedUser.id,
+    ];
+    ids.sort((a, b) => a.compareTo(b));
+    String chatId = ids.join('_');
+    final chatDocument = ChatController.to.chatCollection.doc(chatId);
+    DocumentSnapshot chatSnapshot = await chatDocument.get();
+    chatSnapshot.exists
+        ? await chatDocument.update({
+            'updated_at': FieldValue.serverTimestamp(),
+          })
+        : await chatDocument.set({
+            'created_at': FieldValue.serverTimestamp(),
+            'updated_at': FieldValue.serverTimestamp(),
+          });
+    Get.toNamed('/chat', arguments: [
+      chatId,
+      UserController.to.selectedUser['name'],
+      UserController.to.selectedUser.id,
+    ]);
+  }
+
+  Future createMessage(
+      {required String chatRoomId, required String text}) async {
+    await chatCollection.doc(chatRoomId).collection('message').add({
+      'sender': UserController.to.user['name'],
+      'created_at': FieldValue.serverTimestamp(),
+      'text': text,
+    });
   }
 
 // Future<QuerySnapshot> getCachedQuery(String collection) async {
@@ -38,12 +57,11 @@ class ChatController extends GetxController {
 //   }
 // }
 //
-// Future<List<ChatMessage>> getChatMessages(String chatId) async {
-//   final snapshot = await getCachedQuery('chats/$chatId/messages');
-//   final messages = snapshot.docs
-//       .map((doc) => ChatMessage.fromFirestore(doc))
-//       .toList();
+//   Future<List<ChatMessage>> getChatMessages(String chatId) async {
+//     final snapshot = await getCachedQuery('chats/$chatId/messages');
+//     final messages =
+//         snapshot.docs.map((doc) => ChatMessage.fromFirestore(doc)).toList();
 //
-//   return messages;
-// }
+//     return messages;
+//   }
 }

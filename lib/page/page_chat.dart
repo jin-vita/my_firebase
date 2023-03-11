@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -45,6 +46,8 @@ class ChatPage extends StatelessWidget {
                         .snapshots(),
                     builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                       if (snapshot.hasData) {
+                        DefaultCacheManager()
+                            .getSingleFile('url', key: Get.arguments[0]);
                         return ListView.separated(
                           reverse: true,
                           padding: const EdgeInsets.symmetric(
@@ -86,7 +89,7 @@ class ChatPage extends StatelessWidget {
                           ),
                         );
                       }
-                      return const CircularProgressIndicator();
+                      return const Center(child: CircularProgressIndicator());
                     },
                   ),
                 ),
@@ -102,22 +105,18 @@ class ChatPage extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 ElevatedButton(
-                  onPressed: () async {
-                    String message = textController.text;
+                  onPressed: () {
+                    String text = textController.text;
                     textController.text = '';
-                    await ChatController.to.chatCollection
-                        .doc(Get.arguments[0])
-                        .collection('message')
-                        .add({
-                      'sender': UserController.to.user['name'],
-                      'created_at': FieldValue.serverTimestamp(),
-                      'text': message,
-                    });
+                    ChatController.to.createMessage(
+                      chatRoomId: Get.arguments[0],
+                      text: text,
+                    );
                     PushController.to.sendFcmMessage(
-                      message,
-                      Get.arguments[0],
-                      UserController.to.user['name'],
-                      Get.arguments[2],
+                      text: text,
+                      chatId: Get.arguments[0],
+                      sender: UserController.to.user['name'],
+                      userDocumentId: Get.arguments[2],
                     );
                   },
                   child: const Text('전송'),

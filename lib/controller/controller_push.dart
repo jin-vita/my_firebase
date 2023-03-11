@@ -163,12 +163,12 @@ class PushController extends GetxController {
     return accessCredentials.data;
   }
 
-  Future<void> sendFcmMessage(
-    String text,
-    String chatId,
-    String sender,
-    String userDocumentId,
-  ) async {
+  Future<void> sendFcmMessage({
+    required String text,
+    required String chatId,
+    required String sender,
+    required String userDocumentId,
+  }) async {
     final QuerySnapshot snapshot = await UserController.to.userCollection
         .where('__name__', isEqualTo: userDocumentId)
         .get();

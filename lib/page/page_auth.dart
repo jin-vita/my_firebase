@@ -21,7 +21,7 @@ class AuthPage extends StatelessWidget {
           return Builder(builder: (context) {
             logger.w(
                 'LoginPage - name : ${snapshot.data!.displayName}, email : ${snapshot.data!.email}');
-            UserController.to.initId(snapshot.data!.email);
+            UserController.to.initUser(snapshot.data!.email);
             return const HomePage();
           });
         }

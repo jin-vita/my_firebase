@@ -78,7 +78,8 @@ class MyApp extends StatelessWidget {
         GetPage(
           name: '/chat',
           page: () => const ChatPage(),
-          transition: Transition.rightToLeft,
+          transition: Transition.downToUp,
+          transitionDuration: const Duration(milliseconds: 150),
         ),
         GetPage(
           name: '/menu',
