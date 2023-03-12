@@ -13,6 +13,7 @@ import 'page/page_auth.dart';
 import 'page/page_chat.dart';
 import 'page/page_home.dart';
 import 'page/page_menu.dart';
+import 'page/page_room.dart';
 
 // flutter pub add get
 // flutter pub add dio
@@ -76,6 +77,10 @@ class MyApp extends StatelessWidget {
         GetPage(
           name: '/home',
           page: () => const HomePage(),
+        ),
+        GetPage(
+          name: '/room',
+          page: () => const RoomPage(),
         ),
         GetPage(
           name: '/chat',

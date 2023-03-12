@@ -66,7 +66,7 @@ class ChatPage extends StatelessWidget {
                                   ? document['created_at'].toDate()
                                   : DateTime.now();
                           String formattedDateTime =
-                              DateFormat('HH:mm').format(dateTime);
+                              DateFormat('MM/dd HH:mm').format(dateTime);
                           return Card(
                             color: document['sender'] ==
                                     UserController.to.user['name']
@@ -79,8 +79,10 @@ class ChatPage extends StatelessWidget {
                                 : const EdgeInsets.only(
                                     top: 5, bottom: 5, left: 5, right: 60),
                             child: ListTile(
-                              title: Text(
-                                  '${document['text']}  ${snapshot.hasData ? formattedDateTime : '00:00'}'),
+                              title: Text(document['sender'] ==
+                                      UserController.to.user['name']
+                                  ? '${snapshot.hasData ? formattedDateTime : ''}   ${document['text']}'
+                                  : '${document['text']}   ${snapshot.hasData ? formattedDateTime : ''}'),
                               // subtitle: Text(formattedDateTime),
                             ),
                           );

@@ -22,6 +22,15 @@ class ChatController extends GetxController {
     prefs = await SharedPreferences.getInstance();
   }
 
+  Future<DocumentSnapshot> setSelected(String chatRoomId) async {
+    String selectedId = chatRoomId
+        .replaceAll(UserController.to.user.id, '')
+        .replaceAll('_', '');
+    DocumentSnapshot selected =
+        await UserController.to.userCollection.doc(selectedId).get();
+    return selected;
+  }
+
   Future createChatRoom(DocumentSnapshot selected) async {
     UserController.to.selectedUser = selected;
     List ids = [
@@ -29,19 +38,23 @@ class ChatController extends GetxController {
       selected.id,
     ];
     ids.sort((a, b) => a.compareTo(b));
-    String chatId = ids.join('_');
-    final chatDocument = ChatController.to.chatCollection.doc(chatId);
+    String chatRoomId = ids.join('_');
+    final chatDocument = ChatController.to.chatCollection.doc(chatRoomId);
     DocumentSnapshot chatSnapshot = await chatDocument.get();
-    chatSnapshot.exists
-        ? await chatDocument.update({
-            'updated_at': FieldValue.serverTimestamp(),
-          })
-        : await chatDocument.set({
-            'created_at': FieldValue.serverTimestamp(),
-            'updated_at': FieldValue.serverTimestamp(),
-          });
+    if (!chatSnapshot.exists) {
+      await chatDocument.set({
+        'name':
+            '${UserController.to.user['name']}${UserController.to.selectedUser['name']}',
+        'photo':
+            '${UserController.to.user['photo']}${UserController.to.selectedUser['photo']}',
+        'ids': ids,
+        'message': '아직 대화가 없어요',
+        'created_at': FieldValue.serverTimestamp(),
+        'updated_at': FieldValue.serverTimestamp(),
+      });
+    }
     Get.toNamed('/chat', arguments: [
-      chatId,
+      chatRoomId,
       selected['name'],
       selected.id,
     ]);
@@ -55,6 +68,11 @@ class ChatController extends GetxController {
       'sender': UserController.to.user['name'],
       'created_at': FieldValue.serverTimestamp(),
       'text': text,
+    });
+    final chatDocument = ChatController.to.chatCollection.doc(chatRoomId);
+    await chatDocument.update({
+      'message': text,
+      'updated_at': FieldValue.serverTimestamp(),
     });
   }
 

@@ -2,24 +2,25 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:my_firebase/controller/controller_ui.dart';
-import 'package:my_firebase/controller/controller_user.dart';
-import 'package:my_firebase/main.dart';
-import 'package:my_firebase/widget/navigation.dart';
+import 'package:intl/intl.dart';
 import 'package:scroll_app_bar/scroll_app_bar.dart';
 
 import '../controller/controller_chat.dart';
+import '../controller/controller_ui.dart';
+import '../controller/controller_user.dart';
+import '../main.dart';
 import '../widget/logout.dart';
+import '../widget/navigation.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+class RoomPage extends StatelessWidget {
+  const RoomPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: ScrollAppBar(
         controller: controller,
-        title: const Text('친구'),
+        title: const Text('대화'),
       ),
       body: WillPopScope(
         onWillPop: () => exit(context),
@@ -29,35 +30,11 @@ class HomePage extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 10),
-              GestureDetector(
-                onTap: () {
-                  ChatController.to.createChatRoom(UserController.to.user);
-                },
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: CachedNetworkImageProvider(
-                      UserController.to.auth.currentUser!.photoURL!,
-                    ),
-                    // backgroundImage: NetworkImage(
-                    //     UserController.to.auth.currentUser!.photoURL!),
-                  ),
-                  title: Text(
-                      '${UserController.to.auth.currentUser!.displayName} ✔'),
-                  subtitle: Text(UserController.to.auth.currentUser!.email!),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Container(
-                height: 2,
-                color: Colors.grey.shade200,
-              ),
-              const SizedBox(height: 10),
               Expanded(
                 child: StreamBuilder(
-                  stream: UserController.to.userCollection
-                      // .where('__name__',
-                      //     isNotEqualTo: UserController.to.user.id)
-                      .orderBy('name')
+                  stream: ChatController.to.chatCollection
+                      .where('ids', arrayContains: UserController.to.user.id)
+                      // .orderBy('updated_at')
                       .snapshots(),
                   builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                     if (snapshot.hasData) {
@@ -70,20 +47,36 @@ class HomePage extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final DocumentSnapshot document =
                               snapshot.data!.docs[index];
+                          if (snapshot.data!.docs.isEmpty) {
+                            return const Text('대화가 없어요!');
+                          }
                           return GestureDetector(
-                            onTap: () {
-                              ChatController.to.createChatRoom(document);
+                            onTap: () async {
+                              final selected = await ChatController.to
+                                  .setSelected(document.id);
+                              ChatController.to.createChatRoom(selected);
                             },
                             child: ListTile(
                               leading: CircleAvatar(
                                 backgroundImage: CachedNetworkImageProvider(
-                                  document['photo'],
+                                  document['ids'][0] !=
+                                              UserController.to.user.id ||
+                                          document['ids'][1] !=
+                                              UserController.to.user.id
+                                      ? document['photo'].replaceAll(
+                                          UserController.to.user['photo'], '')
+                                      : UserController.to.user['photo'],
                                 ),
-                                // backgroundImage:
-                                //     NetworkImage(document['photo']),
                               ),
-                              title: Text(document['name']),
-                              subtitle: Text(document['email']),
+                              title: Text(document['ids'][0] !=
+                                          UserController.to.user.id ||
+                                      document['ids'][1] !=
+                                          UserController.to.user.id
+                                  ? document['name'].replaceAll(
+                                      UserController.to.user['name'], '')
+                                  : UserController.to.user['name']),
+                              subtitle: Text(
+                                  '${DateFormat('MM/dd HH:mm').format(document['updated_at'].toDate())}   ${document['message']}'),
                             ),
                           );
                         },
