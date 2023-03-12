@@ -52,8 +52,13 @@ class RoomPage extends StatelessWidget {
                           }
                           return GestureDetector(
                             onTap: () async {
-                              final selected = await ChatController.to
-                                  .setSelected(document.id);
+                              final selected = document['ids'][0] !=
+                                          UserController.to.user.id ||
+                                      document['ids'][1] !=
+                                          UserController.to.user.id
+                                  ? await ChatController.to
+                                      .setSelected(document.id)
+                                  : UserController.to.user;
                               ChatController.to.createChatRoom(selected);
                             },
                             child: ListTile(
