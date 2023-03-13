@@ -26,8 +26,8 @@ class ChatModel {
   Map<String, dynamic> toFirestore() {
     return {
       "name": name,
-      "email": ids,
-      "token": updated,
+      "ids": ids,
+      "updated": updated,
     };
   }
 }

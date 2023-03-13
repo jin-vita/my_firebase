@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:my_firebase/controller/controller_user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -88,7 +89,8 @@ class ChatController extends GetxController {
     for (var element in messageQuerySnapshot.docs) {
       Map<String, dynamic> map = {};
       map['sender'] = element['sender'];
-      map['created_at'] = element['created_at'].toString();
+      map['created_at'] =
+          DateFormat('MM/dd HH:mm').format(element['created_at'].toDate());
       map['text'] = element['text'];
       messageList.add(jsonEncode(map));
     }

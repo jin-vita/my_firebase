@@ -61,12 +61,12 @@ class ChatPage extends StatelessWidget {
                           final document = snapshot.hasData
                               ? snapshot.data!.docs[index]
                               : jsonDecode(messages[index]);
-                          DateTime dateTime =
-                              document['created_at'] != null && snapshot.hasData
-                                  ? document['created_at'].toDate()
-                                  : DateTime.now();
-                          String formattedDateTime =
-                              DateFormat('MM/dd HH:mm').format(dateTime);
+                          String dateTime = snapshot.hasData
+                              ? DateFormat('MM/dd HH:mm').format(
+                                  document['created_at'] != null
+                                      ? document['created_at'].toDate()
+                                      : DateTime.now())
+                              : document['created_at'];
                           return Card(
                             color: document['sender'] ==
                                     UserController.to.user['name']
@@ -81,8 +81,8 @@ class ChatPage extends StatelessWidget {
                             child: ListTile(
                               title: Text(document['sender'] ==
                                       UserController.to.user['name']
-                                  ? '${snapshot.hasData ? formattedDateTime : ''}   ${document['text']}'
-                                  : '${document['text']}   ${snapshot.hasData ? formattedDateTime : ''}'),
+                                  ? '$dateTime   ${document['text']}'
+                                  : '${document['text']}   $dateTime'),
                               // subtitle: Text(formattedDateTime),
                             ),
                           );

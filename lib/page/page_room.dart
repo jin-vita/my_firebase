@@ -47,6 +47,8 @@ class RoomPage extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final DocumentSnapshot document =
                               snapshot.data!.docs[index];
+                          String dateTime = DateFormat('MM/dd HH:mm')
+                              .format(document['updated_at'].toDate());
                           if (snapshot.data!.docs.isEmpty) {
                             return const Text('대화가 없어요!');
                           }
@@ -80,8 +82,8 @@ class RoomPage extends StatelessWidget {
                                   ? document['name'].replaceAll(
                                       UserController.to.user['name'], '')
                                   : UserController.to.user['name']),
-                              subtitle: Text(
-                                  '${DateFormat('MM/dd HH:mm').format(document['updated_at'].toDate())}   ${document['message']}'),
+                              subtitle:
+                                  Text('$dateTime   ${document['message']}'),
                             ),
                           );
                         },
